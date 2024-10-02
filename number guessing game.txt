@@ -1,0 +1,55 @@
+import tkinter as tk
+import time
+import math
+from PIL import Image, ImageTk
+
+class AnalogClock:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Analog Clock")
+        self.root.geometry("400x400")
+        self.root.resizable(False, False)
+
+        self.canvas = tk.Canvas(self.root, width=400, height=400, bg="white")
+        self.canvas.pack()
+
+        # Load the clock face image
+        self.clock_face = Image.open("clock_face.png")  # Replace with your image path
+        self.clock_face = self.clock_face.resize((400, 400), Image.ANTIALIAS)
+        self.clock_face_tk = ImageTk.PhotoImage(self.clock_face)
+        self.canvas.create_image(200, 200, image=self.clock_face_tk)
+
+        self.update_clock()
+
+    def update_clock(self):
+        self.canvas.delete("hands")
+
+        # Get current time
+        t = time.localtime()
+        seconds = t.tm_sec
+        minutes = t.tm_min
+        hours = t.tm_hour % 12
+
+        # Calculate hand angles
+        second_angle = math.radians(6 * seconds - 90)
+        minute_angle = math.radians(6 * minutes - 90)
+        hour_angle = math.radians(30 * hours + minutes / 2 - 90)
+
+        # Draw the hands
+        self.draw_hand(190, second_angle, fill="red", width=1)  # Second hand
+        self.draw_hand(160, minute_angle, fill="black", width=2)  # Minute hand
+        self.draw_hand(120, hour_angle, fill="black", width=4)  # Hour hand
+
+        # Schedule the next update
+        self.root.after(1000, self.update_clock)
+
+    def draw_hand(self, length, angle, fill, width):
+        x = 200 + length * math.cos(angle)
+        y = 200 + length * math.sin(angle)
+        self.canvas.create_line(200, 200, x, y, fill=fill, width=width, tags="hands")
+
+# Main program
+if __name__ == "__main__":
+    root = tk.Tk()
+    clock = AnalogClock(root)
+    root.mainloop()
